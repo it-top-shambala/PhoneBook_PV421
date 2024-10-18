@@ -4,53 +4,59 @@ public class Person
 {
     public Guid Id { get; set; }
 
-    private string _firstName;
-    public string FirstName
+    private readonly string _firstName;
+    public required string FirstName
     {
         get => _firstName;
-        set
+        init
         {
-            if (!string.IsNullOrWhiteSpace(value))
+            if (string.IsNullOrWhiteSpace(value))
             {
-                _firstName = value;
+                throw new ArgumentNullException("Имя не может быть пустым");
             }
+            _firstName = value;
         }
     }
     
-    private string _lastName;
-    public string LastName
+    private readonly string _lastName;
+    public required string LastName
     {
         get => _lastName;
-        set
+        init
         {
-            if (!string.IsNullOrWhiteSpace(value))
+            if (string.IsNullOrWhiteSpace(value))
             {
-                _lastName = value;
+                throw new ArgumentNullException("Фамилия не может быть пустой");
             }
+            _lastName = value;
         }
     }
     
     public string FullName => $"{FirstName} {LastName}";
     
-    private DateTime _birthDate;
-    public DateTime BirthDate
+    private readonly DateTime? _birthDate;
+    public required DateTime? BirthDate
     {
         get => _birthDate;
-        set
+        init
         {
-            if (value <= DateTime.Now)
+            if (value > DateTime.Now)
             {
-                _birthDate = value;
+                throw new ArgumentOutOfRangeException("Дата рождения не может быть позже текущей даты");
             }
+            
+            _birthDate = value;
         } 
     }
-    private int GetAge()
+    private int? GetAge()
     {
+        if(BirthDate is null) return null;
+        
         var today = DateTime.Today;
-        var age = today.Year - BirthDate.Year;
-        if (BirthDate.Date > today.AddYears(-age)) age--;
+        var age = today.Year - BirthDate.Value.Year;
+        if (BirthDate.Value.Date > today.AddYears(-age)) age--;
         
         return age;
     }
-    public int Age => GetAge();
+    public int? Age => GetAge();
 }
